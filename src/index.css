@@ -23,3 +23,31 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+@media (max-width: 767px) {
+  main > div {
+    padding: 1rem !important;
+  }
+
+  main h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  main h1 + p {
+    font-size: 0.75rem !important;
+  }
+
+  /* Data grids retain their columns and become touch-scrollable on phones. */
+  main .overflow-hidden:has(> table) {
+    overflow-x: auto !important;
+  }
+
+  main table {
+    min-width: 42rem;
+  }
+
+  main input, main select, main textarea, main button {
+    min-height: 2.75rem;
+  }
+}

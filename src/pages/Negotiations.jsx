@@ -56,8 +56,8 @@ export default function Negotiations({ onSelectLead }) {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+      <div className="flex items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-wide">Negotiations & Deal Closures</h1>
           <p className="text-sm text-slate-400 mt-1">Track high-intent active pricing negotiations and finalize property bookings.</p>

@@ -26,8 +26,33 @@ export default function Sidebar({ currentTab, setCurrentTab, user, onLogout }) {
   const userRole = (user?.role || 'sales_exec').toLowerCase();
   const allowedItems = menuItems.filter(item => item.roles.includes(userRole));
 
+  const navigation = (mobile = false) => (
+    <nav className={mobile ? 'flex items-stretch gap-1 overflow-x-auto px-2 py-2 scrollbar-none' : 'p-4 space-y-1.5'}>
+      {allowedItems.map((item) => {
+        const Icon = item.icon;
+        const active = currentTab === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => setCurrentTab(item.id)}
+            className={mobile
+              ? `flex min-w-[4.5rem] flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-semibold transition ${active ? 'bg-cyan-500/15 text-cyan-400' : 'text-slate-500 hover:text-slate-200'}`
+              : `w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${active ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
+          >
+            <div className={mobile ? 'flex flex-col items-center gap-1' : 'flex items-center space-x-3'}>
+              <Icon className={`w-5 h-5 ${active ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className={mobile ? 'max-w-[4.5rem] truncate' : ''}>{item.label}</span>
+            </div>
+            {!mobile && active && <ChevronRight className="w-4 h-4 text-cyan-400" />}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 min-h-screen">
+    <>
+    <aside className="hidden md:flex w-64 bg-slate-900 border-r border-slate-800 flex-col justify-between shrink-0 min-h-screen">
       <div>
         {/* Company Brand Branding */}
         <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
@@ -43,29 +68,7 @@ export default function Sidebar({ currentTab, setCurrentTab, user, onLogout }) {
         </div>
 
         {/* Navigation Items */}
-        <nav className="p-4 space-y-1.5">
-          {allowedItems.map((item) => {
-            const Icon = item.icon;
-            const active = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setCurrentTab(item.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
-                  active
-                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Icon className={`w-5 h-5 ${active ? 'text-cyan-400' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
-                </div>
-                {active && <ChevronRight className="w-4 h-4 text-cyan-400" />}
-              </button>
-            );
-          })}
-        </nav>
+        {navigation()}
       </div>
 
       {/* User Info & Logout */}
@@ -88,5 +91,9 @@ export default function Sidebar({ currentTab, setCurrentTab, user, onLogout }) {
         </button>
       </div>
     </aside>
+    <aside className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg safe-area-bottom">
+      {navigation(true)}
+    </aside>
+    </>
   );
 }

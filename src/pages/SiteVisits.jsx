@@ -46,8 +46,8 @@ export default function SiteVisits({ onSelectLead }) {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+      <div className="flex items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-wide">Site Visits Module</h1>
           <p className="text-sm text-slate-400 mt-1">Manage scheduled property tours, cab pickups, and post-visit buyer feedback.</p>

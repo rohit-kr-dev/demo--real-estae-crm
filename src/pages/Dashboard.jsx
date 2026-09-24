@@ -93,16 +93,16 @@ export default function Dashboard({ onSelectLead }) {
   const m = data?.metrics || {};
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Sales Command Center</h1>
           <p className="text-sm text-slate-400 mt-1">
             Real-time overview · {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Loading...'}
           </p>
         </div>
-        <button onClick={fetchData} className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+        <button onClick={fetchData} className="shrink-0 flex items-center space-x-2 px-3 sm:px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
         </button>
@@ -123,7 +123,7 @@ export default function Dashboard({ onSelectLead }) {
       {/* Middle Row: Funnel + Source Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sales Funnel */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
           <h3 className="font-bold text-white mb-5 flex items-center space-x-2">
             <TrendingUp className="w-5 h-5 text-cyan-400" />
             <span>Sales Funnel</span>
@@ -143,7 +143,7 @@ export default function Dashboard({ onSelectLead }) {
         </div>
 
         {/* Lead Sources */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
           <h3 className="font-bold text-white mb-5 flex items-center space-x-2">
             <Star className="w-5 h-5 text-amber-400" />
             <span>Lead Sources</span>
@@ -171,7 +171,7 @@ export default function Dashboard({ onSelectLead }) {
       {/* Bottom Row: Employee Performance + Live Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Employee Scoreboard */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
           <h3 className="font-bold text-white mb-5 flex items-center space-x-2">
             <Star className="w-5 h-5 text-yellow-400" />
             <span>Team Scoreboard</span>
@@ -213,7 +213,7 @@ export default function Dashboard({ onSelectLead }) {
         </div>
 
         {/* Live Activity Feed */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6">
           <h3 className="font-bold text-white mb-5 flex items-center space-x-2">
             <Zap className="w-5 h-5 text-cyan-400" />
             <span>Live Activity Feed</span>

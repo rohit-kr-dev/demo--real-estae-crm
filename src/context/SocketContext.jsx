@@ -3,7 +3,8 @@ import { io } from 'socket.io-client';
 
 const SocketContext = createContext(null);
 
-const BACKEND_URL = 'http://localhost:5000';
+const configuredBackendUrl = import.meta.env.VITE_SOCKET_URL?.trim().replace(/\/$/, '');
+const BACKEND_URL = configuredBackendUrl || (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 export function SocketProvider({ children, user }) {
   const socketRef = useRef(null);
@@ -11,6 +12,10 @@ export function SocketProvider({ children, user }) {
 
   useEffect(() => {
     if (!user) return;
+
+    // The REST API can work without sockets, so avoid a perpetual reconnect loop
+    // when a production deployment has not configured its Socket.IO endpoint.
+    if (!BACKEND_URL) return undefined;
 
     const socket = io(BACKEND_URL, {
       auth: {

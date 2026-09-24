@@ -52,11 +52,11 @@ function CRMApp({ user, onLogout }) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header Bar */}
-        <header className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-slate-950 border-b border-slate-800/80">
+        <header className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 bg-slate-950 border-b border-slate-800/80">
           <div className="flex items-center space-x-3">
             {/* Connection status dot */}
             <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} title={connected ? 'Real-time connected' : 'Reconnecting...'} />
-            <span className="text-xs text-slate-500">{connected ? 'Live' : 'Reconnecting...'}</span>
+            <span className="text-xs text-slate-500">{connected ? 'Live' : 'Offline demo'}</span>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -86,7 +86,7 @@ function CRMApp({ user, onLogout }) {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
           {selectedLeadId ? (
             <ErrorBoundary>
               <LeadDetail leadId={selectedLeadId} onBack={() => setSelectedLeadId(null)} />

@@ -58,8 +58,8 @@ export default function Followups({ onSelectLead }) {
   ];
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+      <div className="flex items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-wide">Follow-ups Manager</h1>
           <p className="text-sm text-slate-400 mt-1">Track scheduled calls, tasks, and overdue customer contacts.</p>
@@ -74,7 +74,7 @@ export default function Followups({ onSelectLead }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center space-x-2 overflow-x-auto scrollbar-none border-b border-slate-800 pb-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -82,7 +82,7 @@ export default function Followups({ onSelectLead }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center space-x-2 transition ${
+              className={`shrink-0 px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center space-x-2 transition ${
                 active
                   ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
