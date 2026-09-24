@@ -3,6 +3,7 @@ const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? 'http://localhos
 
 export const isApiConfigured = Boolean(API_BASE_URL);
 const DEMO_LEADS_KEY = 'crm_demo_leads';
+const DEMO_EVENTS_KEY = 'crm_demo_events';
 const INITIAL_DEMO_LEADS = [
   { id: 101, name: 'Ananya Krishnan', phone: '+91 98123 45671', email: 'ananya@example.com', budget: 35000000, preferredLocation: 'Bandra West', stage: 'Interested', status: 'Active', assigned_to_name: 'Amit Verma', created_at: '2026-09-22T10:00:00.000Z' },
   { id: 102, name: 'Rohan Mehta', phone: '+91 98123 45672', email: 'rohan@example.com', budget: 18000000, preferredLocation: 'Thane', stage: 'Follow-up', status: 'Active', assigned_to_name: 'Vikram Singh', created_at: '2026-09-23T09:30:00.000Z' },
@@ -23,6 +24,17 @@ function getDemoLeads() {
 
 function saveDemoLeads(leads) {
   localStorage.setItem(DEMO_LEADS_KEY, JSON.stringify(leads));
+}
+
+function getDemoEvents(leadId) {
+  const events = JSON.parse(localStorage.getItem(DEMO_EVENTS_KEY) || '{}');
+  return events[leadId] || [];
+}
+
+function recordDemoEvent(leadId, title, description) {
+  const events = JSON.parse(localStorage.getItem(DEMO_EVENTS_KEY) || '{}');
+  events[leadId] = [{ id: Date.now(), type: 'ACTIVITY', title, description, created_at: new Date().toISOString(), user_name: 'Demo Team' }, ...(events[leadId] || [])];
+  localStorage.setItem(DEMO_EVENTS_KEY, JSON.stringify(events));
 }
 
 function demoApiRequest(endpoint, method, body) {
@@ -57,15 +69,35 @@ function demoApiRequest(endpoint, method, body) {
   if (leadMatch && method === 'GET') {
     const lead = getDemoLeads().find((item) => item.id === Number(leadMatch[1]));
     if (!lead) throw new Error('Demo lead not found.');
-    return { lead, activities: [{ id: 1, type: 'INGESTION', title: 'Lead added to demo CRM', description: 'Ready for a guided sales workflow.', created_at: lead.created_at, user_name: 'Demo Team' }], followups: [], siteVisits: [], negotiations: [], stages: ['New', 'Contact Attempted', 'Connected', 'Interested', 'Follow-up', 'Site Visit Scheduled', 'Site Visit Completed', 'Negotiation', 'Booking/Closed Won'], callOutcomes: ['Connected', 'Not Answered', 'Interested', 'Not Interested'] };
+    return { lead: { ...lead, assigned_user_name: lead.assigned_to_name || 'Demo Team' }, activities: [...getDemoEvents(lead.id), { id: 1, type: 'INGESTION', title: 'Lead added to demo CRM', description: 'Ready for a guided sales workflow.', created_at: lead.created_at, user_name: 'Demo Team' }], followups: [], siteVisits: [], negotiations: [], stages: ['New', 'Contact Attempted', 'Connected', 'Interested', 'Follow-up', 'Site Visit Scheduled', 'Site Visit Completed', 'Negotiation', 'Booking/Closed Won'], callOutcomes: ['Connected', 'RNR', 'Busy', 'Interested', 'Follow-up Scheduled', 'Not Interested'] };
   }
 
   const stageMatch = path.match(/^\/leads\/(\d+)\/stage$/);
   if (stageMatch && method === 'PUT') {
     const leads = getDemoLeads().map((lead) => lead.id === Number(stageMatch[1]) ? { ...lead, stage: body.stage } : lead);
     saveDemoLeads(leads);
+    recordDemoEvent(Number(stageMatch[1]), `Stage changed to ${body.stage}`, body.remarks || 'Stage updated in the demo workflow.');
     return { success: true };
   }
+
+  const actionMatch = path.match(/^\/leads\/(\d+)\/(call-outcome|reassign|notes)$/);
+  if (actionMatch && method === 'POST') {
+    const leadId = Number(actionMatch[1]);
+    if (actionMatch[2] === 'call-outcome') {
+      const stage = body.outcome === 'Interested' ? 'Interested' : body.outcome === 'Connected' ? 'Connected' : body.outcome === 'Follow-up Scheduled' ? 'Follow-up' : body.outcome === 'Not Interested' ? 'Not Interested' : 'Contact Attempted';
+      saveDemoLeads(getDemoLeads().map((lead) => lead.id === leadId ? { ...lead, stage } : lead));
+      recordDemoEvent(leadId, `Call feedback: ${body.outcome}`, body.remarks || 'Call outcome recorded.');
+    } else if (actionMatch[2] === 'reassign') {
+      const user = DEMO_USERS.find((item) => item.id === body.assignedUserId);
+      saveDemoLeads(getDemoLeads().map((lead) => lead.id === leadId ? { ...lead, assigned_to_name: user?.name || 'Demo Team' } : lead));
+      recordDemoEvent(leadId, 'Lead assigned', `Assigned to ${user?.name || 'Demo Team'}.`);
+    } else recordDemoEvent(leadId, 'Note added', body.note);
+    return { success: true };
+  }
+
+  if (path === '/followups' && method === 'POST') { recordDemoEvent(Number(body.leadId), 'Follow-up scheduled', `${body.actionType} scheduled for ${body.scheduledAt}.`); return { success: true }; }
+  if (path === '/site-visits' && method === 'POST') { saveDemoLeads(getDemoLeads().map((lead) => lead.id === Number(body.leadId) ? { ...lead, stage: 'Site Visit Scheduled' } : lead)); recordDemoEvent(Number(body.leadId), 'Site visit confirmed', body.remarks || 'Property visit scheduled.'); return { success: true }; }
+  if (path === '/negotiations' && method === 'POST') { saveDemoLeads(getDemoLeads().map((lead) => lead.id === Number(body.leadId) ? { ...lead, stage: 'Negotiation' } : lead)); recordDemoEvent(Number(body.leadId), 'Negotiation started', `Customer offer: ₹${body.latestOffer}.`); return { success: true }; }
 
   if (path === '/dashboard/summary') {
     const leads = getDemoLeads();
