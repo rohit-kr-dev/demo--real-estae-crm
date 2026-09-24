@@ -3,10 +3,22 @@ const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? 'http://localhos
 
 export const isApiConfigured = Boolean(API_BASE_URL);
 const DEMO_LEADS_KEY = 'crm_demo_leads';
+const INITIAL_DEMO_LEADS = [
+  { id: 101, name: 'Ananya Krishnan', phone: '+91 98123 45671', email: 'ananya@example.com', budget: 35000000, preferredLocation: 'Bandra West', stage: 'Interested', status: 'Active', assigned_to_name: 'Amit Verma', created_at: '2026-09-22T10:00:00.000Z' },
+  { id: 102, name: 'Rohan Mehta', phone: '+91 98123 45672', email: 'rohan@example.com', budget: 18000000, preferredLocation: 'Thane', stage: 'Follow-up', status: 'Active', assigned_to_name: 'Vikram Singh', created_at: '2026-09-23T09:30:00.000Z' },
+  { id: 103, name: 'Priya Nair', phone: '+91 98123 45673', email: 'priya@example.com', budget: 42000000, preferredLocation: 'Worli', stage: 'Negotiation', status: 'Active', assigned_to_name: 'Amit Verma', created_at: '2026-09-24T08:15:00.000Z' },
+];
+const DEMO_USERS = [
+  { id: 1, name: 'Rajesh Kumar', email: 'admin@democrm.com', role: 'Admin', is_active: 1 },
+  { id: 3, name: 'Amit Verma', email: 'sales1@democrm.com', role: 'Sales_Exec', is_active: 1 },
+  { id: 4, name: 'Vikram Singh', email: 'tele@democrm.com', role: 'Telecaller', is_active: 1 },
+];
 
 function getDemoLeads() {
   const stored = localStorage.getItem(DEMO_LEADS_KEY);
-  return stored ? JSON.parse(stored) : [];
+  if (stored) return JSON.parse(stored);
+  saveDemoLeads(INITIAL_DEMO_LEADS);
+  return INITIAL_DEMO_LEADS;
 }
 
 function saveDemoLeads(leads) {
@@ -41,17 +53,31 @@ function demoApiRequest(endpoint, method, body) {
     return { leads, total: leads.length, page: 1, totalPages: 1 };
   }
 
-  if (path === '/dashboard/summary') {
-    const leads = getDemoLeads();
-    return { metrics: { totalLeads: leads.length, activeLeads: leads.length, newLeads: leads.length, wonLeads: 0, overdueFU: 0, todayFU: 0, todayVisits: 0, siteVisits: 0, activeNegs: 0, lostLeads: 0, unassigned: leads.length }, funnel: { total: leads.length }, bySource: [], employeePerformance: [], recentActivity: [], todayFollowupsList: [] };
+  const leadMatch = path.match(/^\/leads\/(\d+)$/);
+  if (leadMatch && method === 'GET') {
+    const lead = getDemoLeads().find((item) => item.id === Number(leadMatch[1]));
+    if (!lead) throw new Error('Demo lead not found.');
+    return { lead, activities: [{ id: 1, type: 'INGESTION', title: 'Lead added to demo CRM', description: 'Ready for a guided sales workflow.', created_at: lead.created_at, user_name: 'Demo Team' }], followups: [], siteVisits: [], negotiations: [], stages: ['New', 'Contact Attempted', 'Connected', 'Interested', 'Follow-up', 'Site Visit Scheduled', 'Site Visit Completed', 'Negotiation', 'Booking/Closed Won'], callOutcomes: ['Connected', 'Not Answered', 'Interested', 'Not Interested'] };
   }
 
-  if (path === '/auth/users') return { users: [] };
+  const stageMatch = path.match(/^\/leads\/(\d+)\/stage$/);
+  if (stageMatch && method === 'PUT') {
+    const leads = getDemoLeads().map((lead) => lead.id === Number(stageMatch[1]) ? { ...lead, stage: body.stage } : lead);
+    saveDemoLeads(leads);
+    return { success: true };
+  }
+
+  if (path === '/dashboard/summary') {
+    const leads = getDemoLeads();
+    return { metrics: { totalLeads: leads.length, activeLeads: leads.length, newLeads: leads.filter((lead) => lead.stage === 'New').length, wonLeads: 0, overdueFU: 1, todayFU: 2, todayVisits: 1, siteVisits: 1, activeNegs: 1, lostLeads: 0, unassigned: 0 }, funnel: { total: leads.length, contacted: leads.length, interested: 2, siteVisits: 1, negotiations: 1, closures: 0 }, bySource: [{ source_name: 'Website', count: 2 }, { source_name: 'Referral', count: 1 }], employeePerformance: [{ id: 3, name: 'Amit Verma', role: 'Sales Executive', total_assigned: 2, site_visits: 1, closures: 0 }, { id: 4, name: 'Vikram Singh', role: 'Telecaller', total_assigned: 1, site_visits: 0, closures: 0 }], recentActivity: [{ title: 'Follow-up scheduled', lead_name: 'Rohan Mehta', description: 'Discussed preferred floor plan', user_name: 'Vikram Singh', created_at: new Date().toISOString() }], todayFollowupsList: [{ id: 201, lead_id: 102, lead_name: 'Rohan Mehta', scheduled_at: new Date().toISOString(), action_type: 'Call' }] };
+  }
+
+  if (path === '/auth/users') return { users: DEMO_USERS };
   if (path === '/settings/projects') return { projects: [] };
   if (path === '/settings/lead-sources') return { sources: [] };
-  if (path === '/followups') return { followups: [] };
-  if (path === '/site-visits') return { siteVisits: [] };
-  if (path === '/negotiations') return { negotiations: [] };
+  if (path === '/followups') return { followups: [{ id: 201, lead_id: 102, lead_name: 'Rohan Mehta', lead_phone: '+91 98123 45672', scheduled_at: new Date().toISOString(), action_type: 'Call', remarks: 'Discuss financing options', user_name: 'Vikram Singh', status: 'Pending' }] };
+  if (path === '/site-visits') return { siteVisits: [{ id: 301, lead_id: 101, lead_name: 'Ananya Krishnan', lead_phone: '+91 98123 45671', project_name: 'Demo Skyline Tower', scheduled_at: new Date().toISOString(), pickup_required: 1, status: 'Scheduled' }] };
+  if (path === '/negotiations') return { negotiations: [{ id: 401, lead_id: 103, lead_name: 'Priya Nair', lead_phone: '+91 98123 45673', project_name: 'Demo Skyline Tower', unit_number: 'A-1204', quoted_amount: 42000000, latest_offer: 39500000, status: 'Active' }] };
   if (path === '/notifications') return { notifications: [], unreadCount: 0 };
   return { success: true };
 }
