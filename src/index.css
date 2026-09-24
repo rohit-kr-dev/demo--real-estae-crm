@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .journey-button { @apply px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-medium disabled:opacity-40; }
+}
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.flex.h-screen { height: 100dvh; }
+.fixed.inset-0 > .shadow-2xl { max-height: 90dvh; overflow-y: auto; }
+
 @layer base {
   body {
     @apply bg-slate-950 text-slate-100 min-h-screen selection:bg-cyan-500 selection:text-white;

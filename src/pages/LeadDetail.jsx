@@ -16,11 +16,13 @@ import {
   Flame,
   Snowflake,
   FileText,
-  Copy
+  Copy,
+  Zap
 } from 'lucide-react';
-import { apiRequest } from '../services/api';
+import { apiRequest, getCurrentUser } from '../services/api';
 import { useSocket } from '../context/SocketContext';
 import toast from 'react-hot-toast';
+import LeadJourney from '../components/LeadJourney';
 
 // Full lifecycle stages in correct order
 const ALL_STAGES = [
@@ -450,6 +452,7 @@ export default function LeadDetail({ leadId, onBack }) {
         {/* Log Negotiation */}
         <button
           onClick={() => setActiveModal('NEGOTIATION')}
+          disabled={getCurrentUser()?.role === 'Telecaller'}
           className="px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-xl text-xs font-semibold flex items-center space-x-2 transition"
         >
           <DollarSign className="w-4 h-4" />
@@ -468,6 +471,7 @@ export default function LeadDetail({ leadId, onBack }) {
         {/* Reassign Lead */}
         <button
           onClick={() => setActiveModal('REASSIGN')}
+          disabled={!['Admin', 'Manager'].includes(getCurrentUser()?.role)}
           className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-2 transition ml-auto"
         >
           <UserCheck className="w-4 h-4" />
@@ -476,6 +480,7 @@ export default function LeadDetail({ leadId, onBack }) {
       </div>
 
       {/* Main Grid */}
+      <LeadJourney data={data} refresh={fetchDetail} open={setActiveModal} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Customer Profile Card */}

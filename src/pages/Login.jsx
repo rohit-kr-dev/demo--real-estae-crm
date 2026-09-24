@@ -21,26 +21,6 @@ export default function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      if (!isApiConfigured) {
-        const demoAccount = demoAccounts.find((account) =>
-          account.email.toLowerCase() === email.trim().toLowerCase() && password === 'Password123!'
-        );
-        if (!demoAccount) throw new Error('Use one of the demo accounts with password Password123!.');
-
-        const user = {
-          id: demoAccount.id,
-          name: demoAccount.name,
-          email: demoAccount.email,
-          role: demoAccount.role,
-          company_id: 1,
-          company: { id: 1, name: 'Demo CRM' },
-        };
-        setAuthToken('frontend-demo-session');
-        setCurrentUser(user);
-        onLoginSuccess(user);
-        return;
-      }
-
       const res = await apiRequest('/auth/login', 'POST', { email, password });
       setAuthToken(res.token);
       setCurrentUser(res.user);
@@ -67,8 +47,7 @@ export default function Login({ onLoginSuccess }) {
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide">Demo CRM</h1>
           <p className="text-sm text-slate-400 mt-1">Real Estate Sales & Lead Automation Platform</p>
-          {!isApiConfigured && <p className="text-xs text-cyan-400 mt-2">Frontend-only demo mode</p>}
-          {!isApiConfigured && <p className="text-xs text-cyan-400 mt-2">Frontend-only demo mode</p>}
+          <p className="text-xs text-cyan-400 mt-2">Interactive demo • Saved in this browser</p>
         </div>
 
         {/* Card */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, DollarSign, Download, ArrowUpRight, Award, Target, Calendar } from 'lucide-react';
-import { apiRequest } from '../services/api';
+import { apiRequest, downloadCsv } from '../services/api';
 import toast from 'react-hot-toast';
 
 export default function Reports() {
@@ -46,7 +46,7 @@ export default function Reports() {
 
         <div className="flex items-center space-x-3">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-1 flex">
-            {['today', 'week', 'month', 'year'].map(r => (
+            {['all records'].map(r => (
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
@@ -61,11 +61,11 @@ export default function Reports() {
             ))}
           </div>
           <button
-            onClick={() => toast.success('Report exported to PDF')}
+            onClick={() => downloadCsv('/leads', 'crm-pipeline.csv').catch(e => toast.error(e.message))}
             className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition"
           >
             <Download className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Export Report</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function Reports() {
           <div className="flex items-baseline space-x-2 mt-2">
             <span className="text-3xl font-bold text-white">{conversionRate}%</span>
             <span className="text-xs text-emerald-400 font-semibold flex items-center">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> +2.4%
+              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Overall
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">{wonLeads} deals won of {totalLeads} leads</p>
@@ -104,9 +104,9 @@ export default function Reports() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
           <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Pipeline Efficiency</p>
           <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-bold text-cyan-400">92%</span>
+            <span className="text-3xl font-bold text-cyan-400">{m.activeLeads || 0}</span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">SLA on follow-ups & initial calls</p>
+          <p className="text-xs text-slate-500 mt-1">Active leads in the pipeline</p>
         </div>
       </div>
 

@@ -22,6 +22,7 @@ function CRMApp({ user, onLogout }) {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [revision, setRevision] = useState(0);
   const { socket, connected } = useSocket() || {};
 
   // Listen for real-time events and show toasts
@@ -71,6 +72,7 @@ function CRMApp({ user, onLogout }) {
             </button>
 
             <NotificationBell />
+            <button onClick={onLogout} className="text-xs px-3 py-2 border border-slate-700 rounded-xl">Switch role</button>
 
             {/* User avatar */}
             <div className="flex items-center space-x-2">
@@ -86,7 +88,7 @@ function CRMApp({ user, onLogout }) {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main key={revision} className="flex-1 min-w-0 overflow-y-auto pb-24 md:pb-0">
           {selectedLeadId ? (
             <ErrorBoundary>
               <LeadDetail leadId={selectedLeadId} onBack={() => setSelectedLeadId(null)} />
@@ -122,7 +124,7 @@ function CRMApp({ user, onLogout }) {
       <LeadModal
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
-        onRefresh={() => {}}
+        onRefresh={() => setRevision(value => value + 1)}
       />
     </div>
   );
