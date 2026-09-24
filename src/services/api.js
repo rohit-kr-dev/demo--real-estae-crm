@@ -1,4 +1,12 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
+const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? 'http://localhost:5000/api' : '');
+
+export const isApiConfigured = Boolean(API_BASE_URL);
+
+function getApiBaseUrl() {
+  if (API_BASE_URL) return API_BASE_URL;
+  throw new Error('CRM API is not configured. Set VITE_API_BASE_URL in the Vercel project settings and redeploy.');
+}
 
 export function getAuthToken() {
   return localStorage.getItem('crm_token');
@@ -39,8 +47,9 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    const data = await res.json();
+    const res = await fetch(`${getApiBaseUrl()}${endpoint}`, config);
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json') ? await res.json() : {};
     if (!res.ok) {
       throw new Error(data.error || 'API Request failed');
     }
@@ -53,7 +62,7 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
 
 export async function downloadCsv(endpoint, filename = 'leads_export.csv') {
   const token = getAuthToken();
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const res = await fetch(`${getApiBaseUrl()}${endpoint}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!res.ok) throw new Error('Failed to download CSV');

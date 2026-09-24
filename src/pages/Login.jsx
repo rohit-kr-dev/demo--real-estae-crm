@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Building, Shield, User, Lock, ArrowRight } from 'lucide-react';
-import { apiRequest, setAuthToken, setCurrentUser } from '../services/api';
+import { apiRequest, isApiConfigured, setAuthToken, setCurrentUser } from '../services/api';
 
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('admin@democrm.com');
@@ -9,10 +9,10 @@ export default function Login({ onLoginSuccess }) {
   const [error, setError] = useState('');
 
   const demoAccounts = [
-    { label: 'Admin (Full Rights)', email: 'admin@democrm.com', role: 'ADMIN' },
-    { label: 'Manager (Team & Reports)', email: 'manager@democrm.com', role: 'MANAGER' },
-    { label: 'Sales Exec (Ravi)', email: 'ravi@democrm.com', role: 'SALES_EXEC' },
-    { label: 'Telecaller (Neha)', email: 'neha@democrm.com', role: 'TELECALLER' },
+    { id: 1, name: 'Rajesh Kumar', label: 'Admin (Full Rights)', email: 'admin@democrm.com', role: 'Admin' },
+    { id: 2, name: 'Priya Sharma', label: 'Manager (Team & Reports)', email: 'manager@democrm.com', role: 'Manager' },
+    { id: 3, name: 'Amit Verma', label: 'Sales Exec (Amit)', email: 'sales1@democrm.com', role: 'Sales_Exec' },
+    { id: 4, name: 'Vikram Singh', label: 'Telecaller (Vikram)', email: 'tele@democrm.com', role: 'Telecaller' },
   ];
 
   const handleLogin = async (e) => {
@@ -21,6 +21,26 @@ export default function Login({ onLoginSuccess }) {
     setError('');
 
     try {
+      if (!isApiConfigured) {
+        const demoAccount = demoAccounts.find((account) =>
+          account.email.toLowerCase() === email.trim().toLowerCase() && password === 'Password123!'
+        );
+        if (!demoAccount) throw new Error('Use one of the demo accounts with password Password123!.');
+
+        const user = {
+          id: demoAccount.id,
+          name: demoAccount.name,
+          email: demoAccount.email,
+          role: demoAccount.role,
+          company_id: 1,
+          company: { id: 1, name: 'Demo CRM' },
+        };
+        setAuthToken('frontend-demo-session');
+        setCurrentUser(user);
+        onLoginSuccess(user);
+        return;
+      }
+
       const res = await apiRequest('/auth/login', 'POST', { email, password });
       setAuthToken(res.token);
       setCurrentUser(res.user);
@@ -47,6 +67,8 @@ export default function Login({ onLoginSuccess }) {
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide">Demo CRM</h1>
           <p className="text-sm text-slate-400 mt-1">Real Estate Sales & Lead Automation Platform</p>
+          {!isApiConfigured && <p className="text-xs text-cyan-400 mt-2">Frontend-only demo mode</p>}
+          {!isApiConfigured && <p className="text-xs text-cyan-400 mt-2">Frontend-only demo mode</p>}
         </div>
 
         {/* Card */}
